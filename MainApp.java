@@ -35,7 +35,6 @@ abstract class Task {
     public abstract String displayTask();
 }
 
-
 class PersonalTask extends Task {
     public PersonalTask(String title) { super(title, "Personal"); }
     @Override
@@ -53,7 +52,6 @@ class UrgentTask extends Task {
     @Override
     public String displayTask() { return "[URGENT] " + getTitle() + " - Status: " + getStatus(); }
 }
-
 
 class TaskManager {
     private List<Task> tasks = new ArrayList<>();
@@ -82,6 +80,7 @@ class TaskManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length < 3) continue;
+
                 String title = parts[0];
                 String category = parts[1];
                 String status = parts[2];
@@ -101,7 +100,6 @@ class TaskManager {
     }
 }
 
-// -------------------- MAIN APP --------------------
 public class MainApp extends Application {
 
     private TaskManager taskManager = new TaskManager();
@@ -137,9 +135,40 @@ public class MainApp extends Application {
         Scene scene = new Scene(layout, 600, 400);
         primaryStage.setScene(scene);
         primaryStage.setTitle("To-Do List App");
+
+        enableTextWrap(); // WRAP LONG TEXT
+
         primaryStage.show();
     }
 
+
+    private void enableTextWrap() {
+        taskListView.setCellFactory(list -> new ListCell<>() {
+            private final Label label = new Label();
+
+            {
+                label.setWrapText(true);
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    label.setText(item);
+                    label.setMaxWidth(taskListView.getWidth() - 20);
+                    label.setPrefWidth(taskListView.getWidth() - 20);
+                    setGraphic(label);
+                }
+            }
+        });
+
+        taskListView.widthProperty().addListener((obs, oldVal, newVal) -> taskListView.refresh());
+    }
+
+  
     private void addTask(String title, String category) {
         if (title.isEmpty()) return;
 
@@ -155,6 +184,7 @@ public class MainApp extends Application {
         refreshList();
     }
 
+
     private void updateStatus() {
         int index = taskListView.getSelectionModel().getSelectedIndex();
         if (index == -1) return;
@@ -166,17 +196,32 @@ public class MainApp extends Application {
         refreshList();
     }
 
+    
     private void deleteTask() {
         int index = taskListView.getSelectionModel().getSelectedIndex();
         if (index == -1) return;
 
-        Task t = taskManager.getTasks().get(index);
-        taskManager.deleteTask(t);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Delete");
+        alert.setHeaderText("Are you sure you want to delete this task?");
+        alert.setContentText("This action cannot be undone.");
 
-        taskManager.saveToFile();
-        refreshList();
+        ButtonType yesButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
+
+        alert.getButtonTypes().setAll(yesButton, noButton);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == yesButton) {
+                Task t = taskManager.getTasks().get(index);
+                taskManager.deleteTask(t);
+                taskManager.saveToFile();
+                refreshList();
+            }
+        });
     }
 
+    
     private void refreshList() {
         taskListView.getItems().clear();
         for (Task t : taskManager.getTasks()) {
@@ -184,9 +229,7 @@ public class MainApp extends Application {
         }
     }
 
-
     public static void main(String[] args) {
         launch(args);
     }
 }
-
