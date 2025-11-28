@@ -29,6 +29,20 @@ Outstanding OOP implementation with all four core concepts properly demonstrated
 
 ---
 
-## Final Grade: 70/100
+### 5. Extra Points (up to 6)
+
+**Features:** 3/5
+- File saving
+- UI JavaFX
+
+**Code Quality:** 1.0/1.0
+- Variable naming: 0.5/0.5
+- Code organization: 0.5/0.5
+
+**Extra Points Total:** +4.0
+
+---
+
+## Final Grade: 70 + 4.0 = **74/100**
 
 *Assessment generated based on project analysis.*
